@@ -1,3 +1,5 @@
+#RECORDAR QUE SE NECESITA TENER A "Modulo_Extra_Permiso_Inseguros.psd1 y Modulo_Extra_Permiso_Inseguros.psm1
+#YA QUE EL MODULO DE LOGGINS YA ESTA IMPLEMENTADO AQUI
 import argparse
 import subprocess
 import logging
