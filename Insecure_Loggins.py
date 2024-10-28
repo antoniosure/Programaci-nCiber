@@ -124,7 +124,6 @@ def verificar_modulos_powershell():
         return
 
     # Validar si los modulos existen
-    ejecutar_script_powershell()
     try:
         if sistema == "Windows":            
             if os.path.exists(psd1_path):
