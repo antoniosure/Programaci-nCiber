@@ -8,6 +8,8 @@ def main():
     from datetime import datetime  # Para obtener la fecha actual
     import platform  # Para verificar el sistema operativo
     import os
+    import hashlib #Para crear valores hash para los docuemntos.
+    import openpyxl 
    
     #IMPORTANTE, para usar la opción acerca las ips maliciosas usted se tiene que registrar cpara obtener una API KEY en el sitio de; https://www.abuseipdb.com/api aqui podra obtener
     #su llave para asi depués guardarla en el folder done tendra este script con el nombre -> ApiKey.txt, de no ser asi el apikey no podrá ser leida y no funcionará esta parte del codigo.
@@ -85,6 +87,22 @@ def main():
             result = subprocess.run("ipconfig" if SO == "Windows" else "ifconfig", capture_output=True, text=True)
             # Captura la salida del comando
             guardar_en_archivo('adaptadores_red.txt', result.stdout)
+            for i in 'adaptadores_red.txt'
+              i = hashlib.sha(256)
+              i.update ()
+              f = i.hexdigest()
+                try: 
+                 if (f != 0 )
+                  print (f) 
+                 wb = openpyxl.Workbook()
+                 sheet = wb.ative()
+    
+                 except: 
+                  print ("El valor hash fue 0, hubo error a la hora de convertir el archivo a valor hash") 
+                
+         
+             
+             
  
         def get_ports():
             nmap_path = r"C:\Program Files (x86)\Nmap\nmap.exe" if SO == "Windows" else "nmap"  # Cambia según SO
