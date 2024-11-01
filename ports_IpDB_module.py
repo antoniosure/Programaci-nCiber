@@ -92,10 +92,11 @@ def main():
               i.update ()
               f = i.hexdigest()
                 try: 
-                 if (f != 0 )
+                 if (f != 0 and f>0 )
                   print (f) 
                  wb = openpyxl.Workbook()
                  sheet = wb.ative()
+                 
     
                  except: 
                   print ("El valor hash fue 0, hubo error a la hora de convertir el archivo a valor hash") 
@@ -227,7 +228,7 @@ def main():
                 'categories': categories,
                 'comment': comentarios
             }
-            with open('apikey.txt', 'r') as archivo:
+            with open('apikey.txt', 'r') as archivo:....................................................................................................................................................................................................................................................................
                 llave = archivo.read().strip()
             headers = {
                 'Accept': 'application/json',
