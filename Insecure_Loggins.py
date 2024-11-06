@@ -1,11 +1,16 @@
-#RECORDAR QUE SE NECESITA TENER A "Modulo_Extra_Permiso_Inseguros.psd1 y Modulo_Extra_Permiso_Inseguros.psm1
-#YA QUE EL MODULO DE LOGGINS YA ESTA IMPLEMENTADO AQUI
 import argparse
 import subprocess
 import logging
 import platform
 import os
+import hashlib
+import openpyxl
 from datetime import datetime
+from openpyxl import Workbook
+from datetime import datetime
+
+
+
 
 # Establecemos el archivo de logs
 def establecer_loggeos(log_file='cyberseguridad_logs.log'):
@@ -74,8 +79,39 @@ def ejecutar_script_powershell():
     except subprocess.CalledProcessError as e:
         print(f"Error ejecutando el script de PowerShell: {e}")
 
+def generar_hash_archivo(file_path):
+    hash_md5 = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
 
+def registrar_tarea_excel(tarea, archivo_reporte, excel_path="registro_tareas.xlsx"):
+    # Verificamos si el archivo Excel existe, si no, lo creamos
+    if not os.path.exists(excel_path):
+        workbook = Workbook()
+        sheet = workbook.active
+        # Especificamos los encabezados
+        sheet.append(["Tarea", "Fecha", "Hash", "Ubicación del archivo"])
+    else:
+        workbook = openpyxl.load_workbook(excel_path)
+        sheet = workbook.active
 
+    # Generamos el hash del archivo de reporte
+    hash_reporte = generar_hash_archivo(archivo_reporte)
+
+    # Obtenemos la fecha actual
+    fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Obtenemos la ubicación absoluta del archivo
+    ubicacion_archivo = os.path.abspath(archivo_reporte)
+
+    # Agregamos la nueva fila en el Excel
+    sheet.append([tarea, fecha_actual, hash_reporte, ubicacion_archivo])
+
+    # Guardamos el archivo Excel
+    workbook.save(excel_path)
+    print(f"Registro de tarea guardado en {excel_path}")
 
 # Funcion para instalar PowerShell en Linux si no esta instalado
 def instalar_powershell_en_linux():
@@ -116,6 +152,7 @@ def verificar_modulos_powershell():
     if sistema == "Windows":
         psd1_path = "C:\\Program Files\\WindowsPowerShell\\Modules\\Modulo_Extra_Permiso_Inseguros\\Modulo_Extra_Permiso_Inseguros.psd1"
         psm1_path = "C:\\Program Files\\WindowsPowerShell\\Modules\\Modulo_Extra_Permiso_Inseguros\\Modulo_Extra_Permiso_Inseguros.psm1"
+        registrar_tarea_excel("Validacion de Integridad de Modulo powershell", psm1_path, excel_path="C:\\tmp\\registro_tareas.xlsx")
     elif sistema == "Linux":
         psd1_path = "/usr/local/share/powershell/Modules/Modulo_Extra_Permiso_Inseguros/Modulo_Extra_Permiso_Inseguros.psd1"
         psm1_path = "/usr/local/share/powershell/Modules/Modulo_Extra_Permiso_Inseguros/Modulo_Extra_Permiso_Inseguros.psm1"
@@ -124,6 +161,7 @@ def verificar_modulos_powershell():
         return
 
     # Validar si los modulos existen
+    ejecutar_script_powershell()
     try:
         if sistema == "Windows":            
             if os.path.exists(psd1_path):
