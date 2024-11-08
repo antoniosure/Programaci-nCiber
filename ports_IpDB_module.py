@@ -15,7 +15,7 @@ def main():
     #su llave para asi depués guardarla en el folder done tendra este script con el nombre -> ApiKey.txt, de no ser asi el apikey no podrá ser leida y no funcionará esta parte del codigo.
     # #La fecha de cada uno de los archivos cuando se guardan se imprime en la creación del archivo como encabezado.
  
-    # Verifica la versión de Python
+    # Verifica la versión de Python, si es version 3 el programa corre normal si es diferente a 3 el programa lo dinaliza de manera controlada con la funcion de sys.
     if sys.version_info[0] < 3:
         print("Este script requiere Python 3 o superior.")
         sys.exit(1)  # Salir del programa si no se cumple la condición
@@ -41,6 +41,7 @@ def main():
     def download_nmap():
         #Descarga Nmap si no está disponible con powershell .
         nmap_url = "https://nmap.org/dist/nmap-7.93-setup.exe"  # Url del instalador
+        
         installer_path = r"C:\Temp\nmap-setup.exe"  # Ruta temporal para guardar el instalador
        
         print("Descargando Nmap...")
@@ -172,6 +173,7 @@ def main():
                 'Accept': 'application/json',
                 'Key': llave
             }
+            print (data[
             response = requests.get(url=url1, headers=headers, params=querystring)
             decodedResponse = response.json()
             guardar_en_archivo('resultado_ip_verificacion.txt', json.dumps(decodedResponse, sort_keys=True, indent=4))
@@ -192,7 +194,7 @@ def main():
             }
             response = requests.get(url=url, headers=headers, params=querystring)
             decodedResponse = response.json()
-            guardar_en_archivo('resultado_cidr.txt', json.dumps(decodedResponse, sort_keys=True, indent=4))
+            guardar_en_archivo('resultado_cidr.txt', json.dumps(decodedResponse, sort_keys=True, ['ipAddress'], ['numReports'], ['abuseConfidenceScore'], ['numReports']))
  
         elif opc == 3:
             print("Usted ingresó a la opción para reportar una IP")
@@ -236,7 +238,8 @@ def main():
             }
             response = requests.post(url=url, headers=headers, params=params)
             decodedResponse = response.json()
-            guardar_en_archivo('resultado_reporte.txt', json.dumps(decodedResponse, sort_keys=True, indent=4))
+         
+            guardar_en_archivo('resultado_reporte.txt', json.dumps(from docodedResponse: print(data['ipAddress'], print(data['abuseConfidenceScore']))
  
         else:
             print("Opción no válida. Por favor ingrese una opción válida (1, 2 o 3).")
