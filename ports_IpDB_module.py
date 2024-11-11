@@ -1,26 +1,28 @@
 def main():
  
-    import sys  # Gestiona la salida del programa y terminarlo de manera controlada.
+    import sys  # Gestiona la salida del programa y terminarlo de manera controlada. 
     import subprocess  # Conecta los subprocesos de linux con python.
-    import shutil  # Verificar si el ejecutable de nmap está disponible en la ruta especificada.
+    import shutil  # Verificar si el ejecutable de nmap está disponible en la ruta especificada. Esta funcion es usada para el copiado y borrado de archivos entre mas varias cosas.
     import requests  # Uso en el API.
     import json  # Darle formato a la salida del API.
     from datetime import datetime  # Para obtener la fecha actual
     import platform  # Para verificar el sistema operativo
     import os
     import hashlib #Para crear valores hash para los docuemntos.
-    import openpyxl 
+    import openpyxl #Uso de paginas excel en el codigo.
+    from openpyxl import Workbook
+    from pathlib import path  #Para crear lsas rutas de archuivos para gaurdar la descarga de nmap. 
    
-    #IMPORTANTE, para usar la opción acerca las ips maliciosas usted se tiene que registrar cpara obtener una API KEY en el sitio de; https://www.abuseipdb.com/api aqui podra obtener
+    #IMPORTANTE, para usar la opción acerca las ips maliciosas usted se tiene que registrar para obtener una API KEY en el sitio de; https://www.abuseipdb.com/api aqui podra obtener
     #su llave para asi depués guardarla en el folder done tendra este script con el nombre -> ApiKey.txt, de no ser asi el apikey no podrá ser leida y no funcionará esta parte del codigo.
     # #La fecha de cada uno de los archivos cuando se guardan se imprime en la creación del archivo como encabezado.
  
-    # Verifica la versión de Python, si es version 3 el programa corre normal si es diferente a 3 el programa lo dinaliza de manera controlada con la funcion de sys.
+    # Verifica la versión de Python
     if sys.version_info[0] < 3:
         print("Este script requiere Python 3 o superior.")
-        sys.exit(1)  # Salir del programa si no se cumple la condición
+        sys.exit(1)  # Salie del programa si no se cumple la condición.
  
-    # Verificación del sistema operativo
+    # Verifica el sistema operativo.
     SO = platform.system()
     if SO == "Windows":
         print("Ejecutando en Windows. Algunas funciones pueden requerir Nmap y PowerShell debido a la instalación del mismo nmap.")
@@ -29,36 +31,58 @@ def main():
     else:
         print(f"SO no soportado: {SO}. Algunas funciones pueden no funcionar correctamente.")
         sys.exit(1)
- 
+        
     def guardar_en_archivo(nombre_archivo, contenido):
-        #Guarda el contenido en un archivo de texto con la fecha de impresión en el encabezado.
         fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(nombre_archivo, 'w') as archivo:
             archivo.write(f"Fecha de impresión: {fecha_actual}\n")
             archivo.write(contenido)
+
         print(f"Los resultados se han guardado en: {nombre_archivo}")
- 
+
+        # Calcula el hash del contenido.
+        hash_obj = hashlib.sha256(contenido.encode())
+        hash_hex = hash_obj.hexdigest()
+
+        # Guarda el nombre del archivo y su hash en un archivo Excel.
+        archivo_excel = "registro_archivos.xlsx"
+        if not os.path.exists(archivo_excel):
+            # Creamos el archivo si no existe.
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Registro" #Es el nombre del worksheet donde andamos trabajando.
+            ws.append(["Nombre del archivo", "Hash"]) 
+        else:
+            # Abrir el archivo si ya existe.
+            wb = openpyxl.load_workbook(archivo_excel)
+            ws = wb["Registro"]
+
+        # Agregaos el nombre del archivo y el hash.
+        ws.append([nombre_archivo, hash_hex])
+
+        # Guardamos los cambios en el archivo Excel.
+        wb.save(archivo_excel)
+        print(f"El nombre del archivo y su hash se han registrado en: {archivo_excel}")
+
     def download_nmap():
         #Descarga Nmap si no está disponible con powershell .
-        nmap_url = "https://nmap.org/dist/nmap-7.93-setup.exe"  # Url del instalador
-        
-        installer_path = r"C:\Temp\nmap-setup.exe"  # Ruta temporal para guardar el instalador
+        nmap_url = "https://nmap.org/dist/nmap-7.93-setup.exe"  # Url del instalador de nmap.
+        ruta = path("C:\Temp\nmap-setup.exe")
+        ruta_instalador = r"C:\Temp\nmap-setup.exe"  # Ruta temporal para guardar el instalador.
        
-        print("Descargando Nmap...")
         response = requests.get(nmap_url)
        
         if response.status_code == 200:
-            with open(installer_path, 'wb') as file:
+            with open(ruta_instalador, 'wb') as file: #se guarda en binario ya que como el archivo no se tiene que ser modificado y se tiene que guardar asi como se descargo ya que no es texto
                 file.write(response.content)
-            print("Descarga completada.")
            
-            # Ejecuta el instalador
-            print("Instalando Nmap")
-            subprocess.run([installer_path], check=True)
+            # Ejecuta el instalador.
+            subprocess.run([ruta_instalador], check=True)
             print("Instalación completada.")
            
-            # Elimina el instalador después de la instalación
-            os.remove(installer_path)
+            # Elimina el instalador después de la instalación, ya que si llega a pasar un error del que el instalador se vea buggeado y se tenga que insalar otra vez
+            #estos archivos instalados no se esten acumulando y haga archivos duplicados sin algun funcionamiento. 
+            os.remove(ruta_instalador)
  
         else:
             print("Error al descargar Nmap.")
@@ -71,7 +95,7 @@ def main():
  
     def Ports_Scanning():
         def verificar_nmap():
-            # Verifica si Nmap está disponible en la ruta especificada
+            # Verificamos si Nmap está disponible en la ruta especificada
             nmap_path = r"C:\Program Files (x86)\Nmap\nmap.exe" if SO == "Windows" else "nmap"  # Cambia según SO
             if not shutil.which(nmap_path):
                 print("Nmap no está instalado en la ruta especificada.")
@@ -86,24 +110,9 @@ def main():
         def obtener_adaptadores():
             print("Entraste a la opción para saber cuáles son tus adaptadores en la red")
             result = subprocess.run("ipconfig" if SO == "Windows" else "ifconfig", capture_output=True, text=True)
-            # Captura la salida del comando
+            # Captura la salida del comando donde aqui mismo se agrega el nombre al archivo y se imprimen los resultados.
             guardar_en_archivo('adaptadores_red.txt', result.stdout)
-            for i in 'adaptadores_red.txt'
-              i = hashlib.sha(256)
-              i.update ()
-              f = i.hexdigest()
-                try: 
-                 if (f != 0 and f>0 )
-                  print (f) 
-                 wb = openpyxl.Workbook()
-                 sheet = wb.ative()
-                 
-    
-                 except: 
-                  print ("El valor hash fue 0, hubo error a la hora de convertir el archivo a valor hash") 
-                
-         
-             
+
              
  
         def get_ports():
@@ -117,7 +126,7 @@ def main():
                     result = subprocess.run([nmap_path, ipsele], capture_output=True, text=True)
                     guardar_en_archivo('resultado_nmap.txt', result.stdout)
                 except FileNotFoundError:
-                    error_mensaje = "Nmap no es compatible con Windows en este script o no está instalado."
+                    error_mensaje = "Nmap no esta en este script o no está instalado."
                     guardar_en_archivo('error_nmap.txt', error_mensaje)
            
             elif opc1 == "2":
@@ -152,7 +161,8 @@ def main():
         obtener_adaptadores()
         get_ports()
  
-    def ipdb():
+    def ipdb(): #toda esta informacion acerca del script fue sacada ade la documentación oficial de código de la página de abuseipdb, lo que hizimos nada mas fue darle el formato 
+        #para darle ingreso a las varaiables que el usuario debera de introducir.
         opc = int(input("""Ingresa la opción que desees:
                         [1] Para checar si una IP ha sido colocada en la lista negra de IPs maliciosas
                         [2] Para checar el CIDR ("Familia de IPs maliciosas")
@@ -160,24 +170,25 @@ def main():
  
         if opc == 1:
             print("Usted entró a la opción de checar si la IP está en la lista negra de IPs maliciosas")
-            url1 = 'https://api.abuseipdb.com/api/v2/check'
+            url1 = 'https://api.abuseipdb.com/api/v2/check' #url a donde nos conectamos para conectarnos a la informacion de la abse de datos de las ips.
             ipb = str(input("Ingresa la IP que quieres verificar si se encuentra en la lista negra: "))
+            #Este diccionario nos deja introducir lo que viene siendo la infroamcion que tendra que consultar en el api.
             querystring = {
                 'ipAddress': ipb,
-                'maxAgeInDays': '90'
+                'maxAgeInDays': '90' 
             }
-            #Volvemos a abrir el archivo txt con el nombre ApiKey.txt para que se pueda leer de ahi por cuestiones de seguridad.
+            #Volvemos a abrir el archivo txt con el nombre ApiKey.txt para que se pueda leer de ahi por cuestiones de seguridad. En la priemr parte del código mencionamos esto. 
             with open('ApiKey.txt', 'r') as archivo:
                 llave = archivo.read().strip()
             headers = {
                 'Accept': 'application/json',
                 'Key': llave
             }
-            print (data[
             response = requests.get(url=url1, headers=headers, params=querystring)
             decodedResponse = response.json()
             guardar_en_archivo('resultado_ip_verificacion.txt', json.dumps(decodedResponse, sort_keys=True, indent=4))
- 
+
+            #Repetimos mas de la informacion que antes explicamos.
         elif opc == 2:
             print("Usted ingresó a la opción de checar la familia de la IP ingresada")
             url = 'https://api.abuseipdb.com/api/v2/check-block'
@@ -194,7 +205,7 @@ def main():
             }
             response = requests.get(url=url, headers=headers, params=querystring)
             decodedResponse = response.json()
-            guardar_en_archivo('resultado_cidr.txt', json.dumps(decodedResponse, sort_keys=True, ['ipAddress'], ['numReports'], ['abuseConfidenceScore'], ['numReports']))
+            guardar_en_archivo('resultado_cidr.txt', json.dumps(decodedResponse, sort_keys=True, indent=4))
  
         elif opc == 3:
             print("Usted ingresó a la opción para reportar una IP")
@@ -230,7 +241,7 @@ def main():
                 'categories': categories,
                 'comment': comentarios
             }
-            with open('apikey.txt', 'r') as archivo:....................................................................................................................................................................................................................................................................
+            with open('apikey.txt', 'r') as archivo:
                 llave = archivo.read().strip()
             headers = {
                 'Accept': 'application/json',
@@ -238,8 +249,7 @@ def main():
             }
             response = requests.post(url=url, headers=headers, params=params)
             decodedResponse = response.json()
-         
-            guardar_en_archivo('resultado_reporte.txt', json.dumps(from docodedResponse: print(data['ipAddress'], print(data['abuseConfidenceScore']))
+            guardar_en_archivo('resultado_reporte.txt', json.dumps(decodedResponse, sort_keys=True, indent=4))
  
         else:
             print("Opción no válida. Por favor ingrese una opción válida (1, 2 o 3).")
@@ -255,5 +265,5 @@ def main():
 if __name__ == "__main__":
     main()
  
- API Documentation - AbuseIPDB 
+
  
