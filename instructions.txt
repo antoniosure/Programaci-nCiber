@@ -1,4 +1,0 @@
-Para utilizar correctamente el main_menu, es necesario tener instalado
-previamente los modulos que estan en esta carpeta, para la corrrecta implementación
-de los mismos, así mismo como tener esta paqueteria de modulos en el ordenador
-del usuario, donde se desea ejecutar el main_menu
