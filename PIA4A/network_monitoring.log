@@ -1,0 +1,11 @@
+2024-11-12 20:59:54,368 - INFO - El modulo llamado 'Get-InsecureFilePermissions' se ejecuto correctamente :)
+2024-11-12 21:06:43,259 - ERROR - El modulo llamado 'Get-InsecureFilePermissions' fallo. Error: Command '['powershell', '-Command', 'Get-InsecureFilePermissions -Path C:\\tmp']' returned non-zero exit status 1.
+2024-11-12 21:08:14,476 - ERROR - El modulo llamado 'Get-InsecureFilePermissions' fallo. Error: Command '['powershell', '-Command', 'Get-InsecureFilePermissions -Path C:\\tmp']' returned non-zero exit status 1.
+2024-11-12 21:11:48,003 - INFO - El modulo llamado 'Get-InsecureFilePermissions' se ejecuto correctamente :)
+2024-11-12 21:20:04,477 - INFO - El modulo llamado 'Get-InsecureFilePermissions' se ejecuto correctamente :)
+2024-11-12 21:29:14,314 - INFO - El modulo llamado 'Get-InsecureFilePermissions' se ejecuto correctamente :)
+2024-11-12 21:29:30,428 - INFO - El modulo llamado 'Get-InsecureFilePermissions' se ejecuto correctamente :)
+2024-11-12 21:32:57,319 - INFO - El modulo llamado 'Get-InsecureFilePermissions' se ejecuto correctamente :)
+2024-11-12 21:56:28,254 - INFO - El modulo llamado 'Get-InsecureFilePermissions' se ejecuto correctamente :)
+2024-11-12 21:56:44,627 - INFO - El modulo llamado 'Get-InsecureFilePermissions' se ejecuto correctamente :)
+2024-11-12 22:14:40,973 - INFO - El modulo llamado 'Get-InsecureFilePermissions' se ejecuto correctamente :)
